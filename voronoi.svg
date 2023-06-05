@@ -1,0 +1,47 @@
+<svg xmlns = "http://www.w3.org/2000/svg" width = "1000" height = "1000">
+<g>
+<polygon points = "259.337, 258.494 398.158, 493.421 389.545, 525.000 0.000, 711.304 0.000, 340.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "410.517, 1000.000 495.584, 691.632 735.345, 615.345 985.690, 645.690 1000.000, 650.568 1000.000, 1000.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "495.584, 691.632 410.517, 1000.000 0.000, 1000.000 0.000, 711.304 389.545, 525.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "615.000, 55.000 615.000, 275.000 541.667, 421.667 398.158, 493.421 259.337, 258.494 431.667, 0.000 601.250, 0.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "735.345, 615.345 495.584, 691.632 389.545, 525.000 398.158, 493.421 541.667, 421.667 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "985.690, 645.690 735.345, 615.345 541.667, 421.667 615.000, 275.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "985.690, 645.690 615.000, 275.000 615.000, 55.000 1000.000, 440.000 1000.000, 650.568 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "615.000, 55.000 601.250, 0.000 1000.000, 0.000 1000.000, 440.000 "
+fill = "none" stroke = "black"/>
+</g>
+<g>
+<polygon points = "259.337, 258.494 0.000, 340.000 0.000, 0.000 431.667, 0.000 "
+fill = "none" stroke = "black"/>
+</g>
+<circle cx = "230.000" cy = "460.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "630.000" cy = "770.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "340.000" cy = "690.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "450.000" cy = "330.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "560.000" cy = "550.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "670.000" cy = "440.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "780.000" cy = "330.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "890.000" cy = "220.000" r = "5" stroke = "black" fill = "black"/>
+<circle cx = "120.000" cy = "110.000" r = "5" stroke = "black" fill = "black"/>
+</svg>
