@@ -82,6 +82,8 @@ protected:
 		}
     }
 public:
+    PowerDiagram() = default;
+
     PowerDiagram(const std::vector<Vector2>& points, const std::vector<double>& weights) {
         if (points.size() != weights.size()) {
             throw std::runtime_error("Number of points and weights must be equal");
@@ -89,6 +91,18 @@ public:
 
         this->points = points;
         this->weights = weights;
+    }
+
+    PowerDiagram(const std::vector<Vector2>& points, double *weights, size_t n) {
+        if (points.size() != n) {
+            throw std::runtime_error("Number of points and weights must be equal");
+        }
+
+        this->points = points;
+        this->weights.resize(n);
+        for(size_t i = 0; i < n; ++i) {
+            this->weights[i] = weights[i];
+        }
     }
 
     PowerDiagram(std::vector<Vector2>&& points, std::vector<double>&& weights) {
@@ -100,6 +114,20 @@ public:
         this->weights = std::move(weights);
     }
 
+    void update_weights(const double *x, size_t n) {
+        if (n != weights.size()) {
+            throw std::runtime_error("Number of weights must be equal to number of points");
+        }
+
+        for(size_t i = 0; i < n; ++i) {
+            weights[i] = x[i];
+        }
+
+        // Invalidate cells so that they are recomputed on next call to get_cells()
+        // This is necessary because the cells depend on the weights
+        cells.clear();
+    }
+
     const std::vector<Polygon>& get_cells() {
         if (cells.empty())
             compute_cells();
@@ -109,5 +137,9 @@ public:
 
     const std::vector<Vector2>& get_points() const {
         return points;
+    }
+
+    const std::vector<double>& get_weights() const {
+        return weights;
     }
 };

@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
-#include "lbfgs.h"
 #include <chrono>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -14,6 +13,7 @@
 #include "fluids/vector.h"
 #include "fluids/poly.hpp"
 #include "fluids/diagram.hpp"
+#include "fluids/ot.hpp"
 
 using Vector = Vector2;
 
@@ -120,6 +120,11 @@ void save(PowerDiagram& pd, std::string filename) {
 	save_svg(cells, filename, "none", points);
 }
 
+void save(OptimalTransport& ot, std::string filename) {
+	std::vector<Polygon> cells = ot.get_cells();
+	save_svg(cells, filename, "none");
+}
+
 int main() {
 	srand(time(0));
 	std::vector<Vector> points = {
@@ -134,13 +139,17 @@ int main() {
         Vector(0.12, 0.89),
     };
 
-	std::vector<double> weights;
+	std::vector<double> weights, lambdas;
 	for (int i = 0; i < points.size(); ++i) {
 		weights.emplace_back(1. / (double)points.size());
+		lambdas.emplace_back(1. / (double)points.size());
 	}
 
 	PowerDiagram pd(points, weights);
 	save(pd, "voronoi.svg");
+
+	OptimalTransport ot(points, lambdas);
+	save(ot, "ot.svg");
 
 	return 0;
 }

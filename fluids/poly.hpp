@@ -12,13 +12,17 @@ private:
     size_t N;
 	std::vector<Vector2> vertices;
 
-    bool check_vertices() {
+    bool check_vertices() const {
         return N >= 3;
     }
 
-    void assert_vertices() {
+    void assert_vertices() const {
         if (!check_vertices()) {
+            #if defined(ERROR)
             throw std::runtime_error("Invalid vertices for polygon");
+            #elif defined(WARNINGS)
+            std::cout << "Warning: invalid vertices for polygon" << std::endl;
+            #endif
         }
     }
 public:
@@ -49,6 +53,9 @@ public:
     }
 
     double signed_area() const { 
+        if (!check_vertices())
+            return 0.;
+
         double result = 0.;
         for(size_t i = 0; i < N; ++i) {
             const Vector2& v1 = vertex_at(i);
@@ -70,6 +77,9 @@ public:
 	}
 
 	double int_norm_2(const Vector2& p) const {
+        if (!check_vertices())
+            return 0.;
+
         // Compute integral |x - p|^2 f(x) dx over our polygon 
 		double result = 0.;
 		size_t num_triangles = N - 2;
@@ -99,6 +109,9 @@ public:
 	}
 
 	Vector2 get_center() const {
+        if (!check_vertices())
+            return Vector2(0., 0.);
+            
 		Vector2 c(0., 0.);
 		for(int i = 0; i < N; ++i) {
 			const Vector2& v1 = vertex_at(i);

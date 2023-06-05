@@ -17,9 +17,9 @@ set(SOURCES main.cpp
             fluids/vector.cpp
             fluids/poly.hpp
             fluids/diagram.hpp
-            lbfgs.c
-            lbfgs.h
-            arithmetic_ansi.h
+            fluids/lbfgs.c
+            fluids/lbfgs.h
+            fluids/arithmetic_ansi.h
             stb_image_write.h
             stb_image.h)
  
