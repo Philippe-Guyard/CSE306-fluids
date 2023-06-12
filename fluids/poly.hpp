@@ -8,172 +8,144 @@
 #include "vector.h"
 
 class Polygon {  
-private: 
-    size_t N;
-	std::vector<Vector2> vertices;
-
-    bool check_vertices() const {
-        return N >= 3;
-    }
-
-    void assert_vertices() const {
-        if (!check_vertices()) {
-            #if defined(ERROR)
-            throw std::runtime_error("Invalid vertices for polygon");
-            #elif defined(WARNINGS)
-            std::cout << "Warning: invalid vertices for polygon" << std::endl;
-            #endif
-        }
-    }
+private:
+    size_t N = 0;
+    std::vector<Vector2> vertices;
 public:
+    // Polygon(std::vector<Vector2>&& v) : vertices(std::move(v)), N(v.size()) { }
+
+    Polygon(const std::vector<Vector2>& v) : vertices(v), N(v.size()) { }
+
     Polygon() = default;
 
-    Polygon(const std::vector<Vector2>& v) : vertices(v), N(v.size()) {
-        assert_vertices();
-    }
+	double area() const {
+		if (vertices.size() < 3)
+			return 0;
 
-    Polygon(std::vector<Vector2>&& v) {
-        vertices = std::move(v);
-        N = vertices.size();
-        assert_vertices();
-    }
+		double result = 0;
+		for (int i = 0; i < vertices.size(); ++i) {
+			const Vector2& v1 = vertices[i];
+			const Vector2& v2 = vertices[(i + 1) % vertices.size()];
+			result += v1.x * v2.y - v1.y * v2.x;
+		}
 
-    const Vector2& vertex_at(size_t index) const {
-        // Support indices from (-N + 1) to (2 * N - 1)
-        if (index >= N)
-            index -= N;
-        if (index < 0)
-            index += N;
+		if (std::fabs(result) < 1e-7) {
+			std::cout << "Warning: area of polygon is too small: " << result << std::endl;
+		}
+		return std::fabs(result / 2.);
+	}
 
-        return vertices[index];
+    const Vector2& vertex_at(size_t i) const {
+        if (i >= N)
+            i -= N;
+        if (i < 0)
+            i += N;
+        
+        return vertices[i];
     }
 
     size_t get_size() const {
         return N;
     }
 
-    double signed_area() const { 
-        if (!check_vertices())
-            return 0.;
-
-        double result = 0.;
-        for(size_t i = 0; i < N; ++i) {
-            const Vector2& v1 = vertex_at(i);
-            const Vector2& v2 = vertex_at(i + 1);
-            result += v1.cross(v2);
-        }
-        if (std::fabs(result) < 1e-7) {
-            #ifdef WARNINGS
-			std::cout << "Warning: area of polygon is too small: " << result << std::endl;
-            #endif 
-		}
-
-        result *= 0.5;
-        return result;
-    }
-
-	double area() const {
-        return std::fabs(signed_area());
-	}
-
 	double int_norm_2(const Vector2& p) const {
-        if (!check_vertices())
-            return 0.;
+		if (vertices.size() < 3)
+			return 0;
 
-        // Compute integral |x - p|^2 f(x) dx over our polygon 
-		double result = 0.;
-		size_t num_triangles = N - 2;
+		double value = 0.;
+		int num_triangles = vertices.size() - 2;
 		for(size_t i = 1; i <= num_triangles; ++i) {
-			Vector2 triangles[3] = {vertex_at(0), vertex_at(i), vertex_at(i + 1)};
+			Vector2 triangles[3] = {vertices[0], vertices[i], vertices[i + 1]};
 			double local_value = 0.;
-			for(int k = 0; k < 3; ++k) 
-				for(int l = k; l < 3; ++l) 
+			for(size_t k = 0; k < 3; ++k) {
+				for(size_t l = k; l < 3; ++l) {
 					local_value += (triangles[k] - p).dot(triangles[l] - p);
-				
+				}
+			}
+
 			Vector2 e1 = triangles[1] - triangles[0];
 			Vector2 e2 = triangles[2] - triangles[0];
-			double triangle_area = 0.5 * std::fabs(e1.cross(e2));
+			double triangle_area = 0.5 * std::fabs(e1.y * e2.x - e1.x * e2.y);
 			if (triangle_area < 1e-7) {
                 #ifdef WARNINGS
 				std::cout << "Warning: triangle area is too small: " << triangle_area << std::endl;
 				std::cout << "e1: " << e1.x << " " << e1.y << std::endl;
 				std::cout << "e2: " << e2.x << " " << e2.y << std::endl;
 				std::cout << e1.y * e2.x - e1.x * e2.y << std::endl;
-                #endif
+                #endif 
 				continue;
 			}
-			result += local_value / 6. * triangle_area;
+			value += local_value / 6. * triangle_area;
 		}
 
-		return result;
+		return value;
 	}
 
 	Vector2 get_center() const {
-        if (!check_vertices())
-            return Vector2(0., 0.);
-            
+		double signed_area = 0.;
 		Vector2 c(0., 0.);
+		size_t N = vertices.size();
 		for(int i = 0; i < N; ++i) {
-			const Vector2& v1 = vertex_at(i);
-			const Vector2& v2 = vertex_at(i + 1);
-			double cross = v1.cross(v2);
+			const Vector2& v1 = vertices[i];
+			const Vector2& v2 = vertices[(i + 1) % N];
+			double cross = v1.x * v2.y - v2.x * v1.y;
 			c.x += (v1.x + v2.x) * cross;
 			c.y += (v1.y + v2.y) * cross; 
+			signed_area += cross;
 		}
 
-		return c / (6 * signed_area());
+		return c / (3 * signed_area);
 	}
-
-    Polygon clip_by(const Polygon& other) {
-        Polygon result = other;
-        for(size_t i = 0; i < other.get_size(); ++i) {
-            const Vector2& u = other.vertex_at(i);
-            const Vector2& v = other.vertex_at(i + 1);
-            Vector2 N(v.y - u.y, u.x - v.x);
-            std::vector<Vector2> new_vertices;
-            for(size_t j = 0; j < result.get_size(); ++j) {
-                const Vector2& A = result.vertex_at(j);
-                const Vector2& B = result.vertex_at(j + 1);
-                double dA = N.dot(A - u);
-                double dB = N.dot(B - u);
-                double t = -dA / (B - A).dot(N);
-                Vector2 intersection = A + t * (B - A);
-                if (dA * dB < 0.) 
-                    new_vertices.emplace_back(intersection);
-                if (dB < 0.) 
-                    new_vertices.emplace_back(B);
-            }
-
-            result = Polygon(std::move(new_vertices));
-        }
-
-        return result;
-    }
-
-    Polygon shift_by(const Vector2& v) const {
-        std::vector<Vector2> new_vertices;
-        for(size_t i = 0; i < N; ++i) {
-            new_vertices.emplace_back(vertex_at(i) + v);
-        }
-
-        return Polygon(std::move(new_vertices));
-    }
-
-    Polygon scale_by(double s) const {
-        std::vector<Vector2> new_vertices;
-        for(size_t i = 0; i < N; ++i) {
-            new_vertices.emplace_back(vertex_at(i) * s);
-        }
-
-        return Polygon(std::move(new_vertices));
-    }
 
     Polygon shift_and_scale(const Vector2& v, double s) const {
         std::vector<Vector2> new_vertices;
-        for(size_t i = 0; i < N; ++i) {
-            new_vertices.emplace_back((vertex_at(i) + v) * s);
+        for(auto& vertex : vertices) {
+            new_vertices.emplace_back(v + vertex * s);
         }
 
-        return Polygon(std::move(new_vertices));
+//        return Polygon(std::move(new_vertices));
+		return Polygon(new_vertices);
+    }
+
+    Polygon clip_by_edge(const Vector2& u, const Vector2& v) {
+        std::vector<Vector2> result;
+		Vector2 N(v.y - u.y, u.x - v.x);
+		for(int i = 0; i < vertices.size(); ++i) {
+			// const Vector2& A = vertex_at(i - 1);
+			// const Vector2& B = vertex_at(i);
+			const Vector2& A = i == 0 ? vertices.back() : vertices[i - 1];
+			const Vector2& B = vertices[i];
+			// Check if A-B is inside clipping domain or in-between
+			double t = (u - A).dot(N) / (B - A).dot(N);
+			Vector2 P = A + t * (B - A);
+			if ((B - u).dot(N) < 0.) {
+				// B is inside
+				if ((A - u).dot(N) > 0.) {
+					// A is outside
+					result.emplace_back(P);
+				} 
+				result.emplace_back(B);
+			}
+			else {
+				// B is outside
+				if ((A - u).dot(N) < 0.) {
+					// A is inside
+					result.emplace_back(P);
+				}
+			}
+		}
+
+		return Polygon(result);
+    }
+
+    Polygon clip_by(const Polygon& other) {
+        Polygon intersected = Polygon(vertices); 
+		for(size_t i = 0; i < other.vertices.size(); ++i) {
+			const Vector2& u = other.vertices[i];
+			const Vector2& v = other.vertices[(i + 1) % other.vertices.size()];
+			intersected = intersected.clip_by_edge(u, v);
+		}
+
+		return intersected;
     }
 };	

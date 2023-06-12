@@ -10,10 +10,12 @@
 #include "stb_image.h"
 #include <sstream>
 
+#define LBFGS_LOGGING
 #include "fluids/vector.h"
 #include "fluids/poly.hpp"
 #include "fluids/diagram.hpp"
 #include "fluids/ot.hpp"
+#include "fluids/fluid.hpp"
 
 using Vector = Vector2;
 
@@ -114,42 +116,65 @@ void save_frame(const std::vector<Polygon> &cells, std::string filename, int fra
 	stbi_write_png(os.str().c_str(), W, H, 3, &image[0], 0);
 }
 
-void save(PowerDiagram& pd, std::string filename) {
-	std::vector<Polygon> cells = pd.get_cells();
-	std::vector<Vector2> points = pd.get_points();
-	save_svg(cells, filename, "none", points);
-}
+// void save(PowerDiagram& pd, std::string filename) {
+// 	std::vector<Polygon> cells = pd.get_cells();
+// 	std::vector<Vector2> points = pd.get_points();
+// 	save_svg(cells, filename, "none", points);
+// }
 
-void save(OptimalTransport& ot, std::string filename) {
+void save(FluidOptimalTransport& ot, std::string filename) {
 	std::vector<Polygon> cells = ot.get_cells();
 	save_svg(cells, filename, "none");
 }
 
 int main() {
 	srand(time(0));
-	std::vector<Vector> points = {
-        Vector(0.23, 0.54),
-        Vector(0.63, 0.23),
-        Vector(0.34, 0.31),
-        Vector(0.45, 0.67),
-        Vector(0.56, 0.45),
-        Vector(0.67, 0.56),
-        Vector(0.78, 0.67),
-        Vector(0.89, 0.78),
-        Vector(0.12, 0.89),
-    };
+	// std::vector<Vector2> disk_vertices;
+	// disk_vertices.reserve(50);
+	// for(size_t i = 0; i < 50; ++i) {
+	// 	double t = ((double)i / 50.) * 2 * M_PI;
+	// 	disk_vertices.emplace_back(Vector2(std::cos(t), std::sin(t)));
+	// }
+	// Polygon unit_disk = Polygon(std::move(disk_vertices));
+	// Polygon unit_square = Polygon({
+	// 	Vector(0., 0.),
+	// 	Vector(1., 0.),
+	// 	Vector(1., 1.),
+	// 	Vector(0., 1.)
+	// });
+	// Polygon clipped_disk = unit_square.clip_by(unit_disk.shift_and_scale(Vector2(0.5, 0.5), 0.5));
+	// save_svg({clipped_disk}, "clipped_disk.svg");
+	// Polygon clipped_2 = intersect_with_disk(unit_disk, unit_square, Vector2(0.5, 0.5), 0.5);
+	// save_svg({clipped_2}, "clipped_2.svg");
+	// return 0;
+	// std::vector<Vector> points = {
+    //     Vector(0.23, 0.54),
+    //     Vector(0.63, 0.23),
+    //     Vector(0.34, 0.31),
+    //     Vector(0.45, 0.67),
+    //     Vector(0.56, 0.45),
+    //     Vector(0.67, 0.56),
+    //     Vector(0.78, 0.67),
+    //     Vector(0.89, 0.78),
+    //     Vector(0.12, 0.89),
+    // };
 
-	std::vector<double> weights, lambdas;
-	for (int i = 0; i < points.size(); ++i) {
-		weights.emplace_back(1. / (double)points.size());
-		lambdas.emplace_back(1. / (double)points.size());
-	}
+	// std::vector<double> weights, lambdas;
+	// for (int i = 0; i < points.size(); ++i) {
+	// 	weights.emplace_back(1. / (double)points.size());
+	// 	lambdas.emplace_back(1. / (double)points.size());
+	// }
 
-	PowerDiagram pd(points, weights);
-	save(pd, "voronoi.svg");
+	// PowerDiagram pd(points, weights);
+	// save(pd, "voronoi.svg");
 
-	OptimalTransport ot(points, lambdas);
-	save(ot, "ot.svg");
+	// FluidOptimalTransport ot(points, lambdas, 0.6);
+	// save(ot, "ot.svg");
+
+	Fluid fluid(20);
+	fluid.run_sim(100, 2., [&](const std::vector<Polygon>& cells, int frameid) {
+		save_frame(cells, "frames/out", frameid);
+	});
 
 	return 0;
 }

@@ -61,8 +61,8 @@ protected:
 		return std::move(result);
     }
 
-    void compute_cells() {
-        cells.resize(points.size());
+    virtual void compute_cells() {
+        cells.reserve(points.size());
         for(size_t i = 0; i < points.size(); ++i) {
             std::vector<Vector2> vertices = {  
                 Vector2(0, 0),
@@ -78,7 +78,7 @@ protected:
                 vertices = clip_by_bisector(vertices, {points[i], weights[i]}, {points[j], weights[j]});
 	    	}
 
-            cells[i] = Polygon(std::move(vertices));
+            cells.emplace_back(Polygon(std::move(vertices)));
 		}
     }
 public:

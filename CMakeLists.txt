@@ -20,6 +20,7 @@ set(SOURCES main.cpp
             fluids/lbfgs.c
             fluids/lbfgs.h
             fluids/arithmetic_ansi.h
+            fluids/fluid.hpp
             stb_image_write.h
             stb_image.h)
  
