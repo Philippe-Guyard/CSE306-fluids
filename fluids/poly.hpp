@@ -9,12 +9,11 @@
 
 class Polygon {  
 private:
-    size_t N = 0;
     std::vector<Vector2> vertices;
 public:
-    // Polygon(std::vector<Vector2>&& v) : vertices(std::move(v)), N(v.size()) { }
+    Polygon(std::vector<Vector2>&& v) : vertices(std::move(v)) { }
 
-    Polygon(const std::vector<Vector2>& v) : vertices(v), N(v.size()) { }
+    Polygon(const std::vector<Vector2>& v) : vertices(v) { }
 
     Polygon() = default;
 
@@ -36,6 +35,7 @@ public:
 	}
 
     const Vector2& vertex_at(size_t i) const {
+		const auto& N = vertices.size();
         if (i >= N)
             i -= N;
         if (i < 0)
@@ -45,7 +45,7 @@ public:
     }
 
     size_t get_size() const {
-        return N;
+        return vertices.size();
     }
 
 	double int_norm_2(const Vector2& p) const {
@@ -103,8 +103,7 @@ public:
             new_vertices.emplace_back(v + vertex * s);
         }
 
-//        return Polygon(std::move(new_vertices));
-		return Polygon(new_vertices);
+        return Polygon(std::move(new_vertices));
     }
 
     Polygon clip_by_edge(const Vector2& u, const Vector2& v) {
@@ -135,7 +134,7 @@ public:
 			}
 		}
 
-		return Polygon(result);
+		return Polygon(std::move(result));
     }
 
     Polygon clip_by(const Polygon& other) {
