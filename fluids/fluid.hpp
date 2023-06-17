@@ -55,7 +55,7 @@ public:
 		particles.reserve(N_particles);
 		velocities.reserve(N_particles);
 		for(size_t i = 0; i < N_particles; ++i) {
-			particles.emplace_back((rand() / double(RAND_MAX), rand() / double(RAND_MAX)));
+			particles.emplace_back(Vector2(rand() / double(RAND_MAX), rand() / double(RAND_MAX)));
 			velocities.emplace_back(Vector2(0., 0.));
 		}
 	}
@@ -64,7 +64,11 @@ public:
 	void run_sim(size_t steps, double total_time, SaveFun save_frame) {
 		double dt = total_time / double(steps);
 		for(size_t i = 0; i < steps; ++i) {
+			auto start = std::chrono::high_resolution_clock::now();
 			FluidOptimalTransport *ot_solver = fluid_step(dt);
+			auto end = std::chrono::high_resolution_clock::now();
+			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			std::cout << "Computing frame " << i << " took " << duration_ms << " ms" << std::endl;
 			save_frame(ot_solver->get_cells(), i);
 			delete ot_solver;
 		}

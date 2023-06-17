@@ -28,9 +28,11 @@ public:
 			result += v1.x * v2.y - v1.y * v2.x;
 		}
 
+		#ifdef WARNINGS
 		if (std::fabs(result) < 1e-7) {
 			std::cout << "Warning: area of polygon is too small: " << result << std::endl;
 		}
+		#endif 
 		return std::fabs(result / 2.);
 	}
 
