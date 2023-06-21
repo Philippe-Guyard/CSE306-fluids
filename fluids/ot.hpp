@@ -26,12 +26,16 @@ private:
     }
 
     void compute_cells() override {
+        Benchmarker::start_one("Computing cells");
         PowerDiagram::compute_cells();
+        Benchmarker::end_one("Computing cells");
         // Avoid recomputing the cells every time
+        Benchmarker::start_one("Clipping cells");
         for(size_t i = 0; i < points.size(); ++i) {
             double radius = std::sqrt(weights[i] - w_air);
             cells[i] = cells[i].clip_by(disk.shift_and_scale(points[i], radius));
         }
+        Benchmarker::end_one("Clipping cells");
     }
 public:
     FluidPowerDiagram() = default;
@@ -77,13 +81,10 @@ protected:
         diagram_solver = FluidPowerDiagram(points, x, n, initial_w_air);
 
 		double fx = 0;
- 
+
+        Benchmarker::start_one("L-BFGS");
 		int ret = lbfgs(n + 1, x, &fx, _evaluate, _progress, this, NULL);
-        // if (ret < 0 && ret != -1001) {
-        //     std::stringstream ss;
-        //     ss << "L-BFGS optimization terminated with status code = " << ret;
-        //     throw std::runtime_error(ss.str());
-        // }
+        Benchmarker::end_one("L-BFGS");
         #ifdef LBFGS_LOGGING
         std::cout << "L-BFGS optimization terminated with status code = " << ret << std::endl;
         if (ret < 0) {
@@ -122,6 +123,7 @@ protected:
         const auto& cells = diagram_solver.get_cells();
         const auto& weights = diagram_solver.get_weights();
 
+        Benchmarker::start_one("L-BFGS evaluation");
         double current_volume_fluid = 0.;
         for (size_t i = 0; i < particles_cnt; ++i) {
             // if (weights[i] - w_air < -0.0001) {
@@ -150,6 +152,7 @@ protected:
         g[w_air_index] = -vol_difference;
         fx += w_air * vol_difference;
 
+        Benchmarker::end_one("L-BFGS evaluation");
         return -fx;
     }
 

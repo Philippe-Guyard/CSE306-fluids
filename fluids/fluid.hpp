@@ -64,11 +64,9 @@ public:
 	void run_sim(size_t steps, double total_time, SaveFun save_frame) {
 		double dt = total_time / double(steps);
 		for(size_t i = 0; i < steps; ++i) {
-			auto start = std::chrono::high_resolution_clock::now();
+			Benchmarker::start_one("fluid_step");
 			FluidOptimalTransport *ot_solver = fluid_step(dt);
-			auto end = std::chrono::high_resolution_clock::now();
-			auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-			std::cout << "Computing frame " << i << " took " << duration_ms << " ms" << std::endl;
+			Benchmarker::end_one("fluid_step");
 			save_frame(ot_solver->get_cells(), i);
 			delete ot_solver;
 		}

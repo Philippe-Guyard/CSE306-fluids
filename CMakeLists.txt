@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(fluid_sim)
 
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -21,7 +22,8 @@ set(SOURCES main.cpp
             fluids/lbfgs.h
             fluids/arithmetic_ansi.h
             fluids/fluid.hpp
+            fluids/nanoflann.hpp
             stb_image_write.h
             stb_image.h)
  
-add_executable(fluid_sim ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})

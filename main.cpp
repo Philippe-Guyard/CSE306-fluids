@@ -52,7 +52,7 @@ int sgn(double x) {
 }
 
 void save_frame(const std::vector<Polygon> &cells, std::string filename, int frameid = 0) {
-	auto start = std::chrono::high_resolution_clock::now();
+	Benchmarker::start_one("save_frame");
 	int W = 500, H = 500;
 	std::vector<unsigned char> image(W*H * 3, 255);
 #pragma omp parallel for schedule(dynamic)
@@ -101,11 +101,11 @@ void save_frame(const std::vector<Polygon> &cells, std::string filename, int fra
 						image[((H - y - 1)*W + x) * 3 + 1] = 0;
 						image[((H - y - 1)*W + x) * 3 + 2] = 255;
 					}
-					// if (mindistEdge <= 2) {
-					// 	image[((H - y - 1)*W + x) * 3] = 0;
-					// 	image[((H - y - 1)*W + x) * 3 + 1] = 0;
-					// 	image[((H - y - 1)*W + x) * 3 + 2] = 0;
-					// }
+					if (mindistEdge <= 2) {
+						image[((H - y - 1)*W + x) * 3] = 0;
+						image[((H - y - 1)*W + x) * 3 + 1] = 0;
+						image[((H - y - 1)*W + x) * 3 + 2] = 0;
+					}
 				}
 				
 			}
@@ -114,9 +114,7 @@ void save_frame(const std::vector<Polygon> &cells, std::string filename, int fra
 	std::ostringstream os;
 	os << filename << frameid << ".png";
 	stbi_write_png(os.str().c_str(), W, H, 3, &image[0], 0);
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	std::cout << "Saving frame " << frameid << " took " << duration_ms << " ms" << std::endl;
+	Benchmarker::end_one("save_frame");
 }
 
 // void save(PowerDiagram& pd, std::string filename) {
@@ -174,10 +172,15 @@ int main() {
 	// FluidOptimalTransport ot(points, lambdas, 0.6);
 	// save(ot, "ot.svg");
 
+	Benchmarker::start_one("Total");
 	Fluid fluid(100);
-	fluid.run_sim(500, 1., [&](const std::vector<Polygon>& cells, int frameid) {
+	fluid.run_sim(500, 2, [&](const std::vector<Polygon>& cells, int frameid) {
 		save_frame(cells, "frames/out", frameid);
 	});
+	Benchmarker::end_one("Total");
+
+	std::cout << "Benchmarking summary: " << std::endl;
+	Benchmarker::print_summary(std::cout);
 
 	return 0;
 }

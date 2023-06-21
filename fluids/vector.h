@@ -11,6 +11,11 @@ public:
     Vector2(double x = 0, double y = 0): x(x), y(y) {};
     Vector2(const std::array<double, 2>& a): x(a[0]), y(a[1]) {};
 
+    static Vector2 infinity();
+    static Vector2 neg_infinity();
+
+    const size_t size() const {return 2;}
+
 	double norm2() const;
 	double norm() const;
 
@@ -25,6 +30,7 @@ public:
     void normalize();
     void operator+=(const Vector2& b);
     double& operator[](size_t i);
+    double  operator[](size_t i) const;
 };
 
 Vector2 operator+(const Vector2& a, const Vector2& b);
