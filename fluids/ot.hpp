@@ -13,7 +13,7 @@ private:
     Polygon disk;
 
     void compute_unit_disk() {
-        const size_t DISK_SIZE = 50;
+        const size_t DISK_SIZE = 30;
         // Avoid recomputing the disk vertices every time
         std::vector<Vector2> disk_vertices;
         disk_vertices.reserve(DISK_SIZE);
@@ -31,6 +31,7 @@ private:
         Benchmarker::end_one("Computing cells");
         // Avoid recomputing the cells every time
         Benchmarker::start_one("Clipping cells");
+        #pragma omp parallel for schedule(dynamic)
         for(size_t i = 0; i < points.size(); ++i) {
             double radius = std::sqrt(weights[i] - w_air);
             cells[i] = cells[i].clip_by(disk.shift_and_scale(points[i], radius));
@@ -92,6 +93,7 @@ protected:
         }
         #endif
         delete x;
+        computed = true;
 	}
 
     static lbfgsfloatval_t _evaluate(

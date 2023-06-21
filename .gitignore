@@ -18,3 +18,5 @@ _deps
 fluid_sim
 
 frames 
+
+sim_out.txt

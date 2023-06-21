@@ -11,6 +11,7 @@
 #include <sstream>
 
 // #define LBFGS_LOGGING
+// #define VORONOI_ALGORITHM 1
 #include "fluids/vector.h"
 #include "fluids/poly.hpp"
 #include "fluids/diagram.hpp"
@@ -101,11 +102,11 @@ void save_frame(const std::vector<Polygon> &cells, std::string filename, int fra
 						image[((H - y - 1)*W + x) * 3 + 1] = 0;
 						image[((H - y - 1)*W + x) * 3 + 2] = 255;
 					}
-					if (mindistEdge <= 2) {
-						image[((H - y - 1)*W + x) * 3] = 0;
-						image[((H - y - 1)*W + x) * 3 + 1] = 0;
-						image[((H - y - 1)*W + x) * 3 + 2] = 0;
-					}
+					// if (mindistEdge <= 2) {
+					// 	image[((H - y - 1)*W + x) * 3] = 0;
+					// 	image[((H - y - 1)*W + x) * 3 + 1] = 0;
+					// 	image[((H - y - 1)*W + x) * 3 + 2] = 0;
+					// }
 				}
 				
 			}
@@ -166,14 +167,25 @@ int main() {
 	// 	lambdas.emplace_back(1. / (double)points.size());
 	// }
 
+	// std::vector<Vector2> points;
+	// std::vector<double> lambdas;
+	// const size_t POINTS = 1000;
+	// for (int i = 0; i < POINTS; ++i) {
+	// 	points.emplace_back(Vector2(rand() / double(RAND_MAX), rand() / double(RAND_MAX)));
+	// 	lambdas.emplace_back(1. / (double)POINTS);
+	// }
+
 	// PowerDiagram pd(points, weights);
 	// save(pd, "voronoi.svg");
 
-	// FluidOptimalTransport ot(points, lambdas, 0.6);
+	// auto start = std::chrono::high_resolution_clock::now();
+	// FluidOptimalTransport ot(points, lambdas, 0);
 	// save(ot, "ot.svg");
+	// auto end = std::chrono::high_resolution_clock::now();
+	// std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
 
 	Benchmarker::start_one("Total");
-	Fluid fluid(100);
+	Fluid fluid(500);
 	fluid.run_sim(500, 2, [&](const std::vector<Polygon>& cells, int frameid) {
 		save_frame(cells, "frames/out", frameid);
 	});

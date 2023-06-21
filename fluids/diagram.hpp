@@ -222,11 +222,12 @@ protected:
         using my_vector_of_vectors_t = std::vector<std::array<double, 3>>;
         using my_kd_tree_t = KDTreeVectorOfVectorsAdaptor<my_vector_of_vectors_t, double>;
         cells.reserve(points.size());
-        // double max_weight = *std::max_element(weights.begin(), weights.end());
+        double max_weight = *std::max_element(weights.begin(), weights.end());
         std::vector<std::array<double, 3>> weighted_points(points.size());
         for(size_t i = 0; i < points.size(); ++i) {
             // Take the std::abs just to make sure we don't take sqrt of -eps
-            weighted_points[i] = {points[i].x, points[i].y, weights[i]};
+            double last_corrd = std::sqrt(std::abs(max_weight - weights[i]));
+            weighted_points[i] = {points[i].x, points[i].y, last_corrd};
         }
         my_kd_tree_t tree(3 /*dim*/, weighted_points, 10 /* max leaf */);
         for(size_t i = 0; i < points.size(); ++i) {
@@ -237,12 +238,6 @@ protected:
                 Vector2(1, 0)
             };
 
-            // for(size_t j = 0; j < points.size(); ++j) {
-            //     if(i == j) 
-            //         continue;
-
-            //     vertices = clip_by_bisector(vertices, {points[i], weights[i]}, {points[j], weights[j]});
-	    	// }
             const size_t k = 10;
             WeightedPoint pair_0 = {points[i], weights[i]};
             double R = 0;
@@ -263,7 +258,7 @@ protected:
                 max_dist = std::sqrt(out_dists_sqr.back()); // - weights[i];
                 R = 0;
                 for(auto& vertex : vertices) {
-                    double dist2 = points[i].dist2(vertex) + weights[i] * weights[i];
+                    double dist2 = points[i].dist2(vertex) + max_weight - weights[i];
                     R = std::max(R, std::sqrt(dist2));
                 }
                 ++idx;
